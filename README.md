@@ -59,15 +59,96 @@ The most significant challenge was creating search queries that would return rel
 
 Another challenge was handling API reliability and quota limits. I implemented a fallback system that shows a demo video when the API is unavailable, ensuring the application always functions for demonstration purposes.
 
-## Installation
+## Setup Instructions
 
-1. Clone the repository
-2. Create a virtual environment: `python -m venv venv`
-3. Activate it: `source venv/bin/activate` (Mac/Linux) or `venv\Scripts\activate` (Windows)
-4. Install dependencies: `pip install -r requirements.txt`
-5. Create `.env` file with your YouTube API key
-6. Run: `python app.py`
+### Prerequisites
+- Python 3.7+
+- YouTube Data API v3 key
+
+### Getting YouTube API Key
+
+1. **Go to Google Cloud Console:**
+   - Visit [Google Cloud Console](https://console.cloud.google.com/)
+   - Sign in with your Google account
+
+2. **Create/Select a Project:**
+   - Click "Select a project" → "New Project"
+   - Name it (e.g., "Ballet Tracker")
+   - Click "Create"
+
+3. **Enable YouTube Data API:**
+   - Go to "APIs & Services" → "Library"
+   - Search for "YouTube Data API v3"
+   - Click on it → "Enable"
+
+4. **Create API Key:**
+   - Go to "APIs & Services" → "Credentials"
+   - Click "Create Credentials" → "API Key"
+   - Copy your API key
+   - (Optional) Click "Restrict Key" to limit it to YouTube Data API
+
+### Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/sandra-lsy/ballet-tracker.git
+   cd ballet-tracker
+   ```
+
+2. **Create virtual environment:**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Set up environment variables:**
+   ```bash
+   # Create .env file
+   touch .env
+   ```
+   
+   Add to `.env` file:
+   ```env
+   YOUTUBE_API_KEY=your_youtube_api_key_here
+   SECRET_KEY=your_secret_key_here
+   ```
+
+5. **Generate Secret Key (for Flask sessions):**
+   ```python
+   # Run this in Python to generate a secret key
+   import secrets
+   print(secrets.token_hex(16))
+   ```
+
+6. **Run the application:**
+   ```bash
+   python app.py
+   ```
+
+7. **Open your browser:**
+   - Go to `http://localhost:5000`
+
+### Note on API Limits
+- YouTube API has daily quotas (10,000 units/day for free tier)
+- If quota is exceeded, the app shows demo videos
+- For production use, consider upgrading your Google Cloud plan
+
+### Troubleshooting
+- **No videos loading?** Check your API key in `.env`
+- **Demo videos only?** Your API quota might be exceeded
+- **Import errors?** Make sure virtual environment is activated
 
 ## Future Enhancements
 
 Potential improvements could include user authentication, more sophisticated video filtering, bookmark notes editing, and a more comprehensive ballet database with historical performance information.
+
+### Security
+- **Never commit your `.env` file** - it contains sensitive API keys
+- The `.gitignore` file prevents accidental commits
+- Use environment variables for all secrets
+- Consider using different API keys for development vs production
