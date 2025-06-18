@@ -1,0 +1,98 @@
+{
+    "swan_lake": {
+      "title": "Swan Lake",
+      "composer": "Tchaikovsky",
+      "synopsis": "A princess turned into a swan by an evil sorcerer's curse. Only true love can break the spell.",
+      "image": "images/swan-lake.jpg",
+      "main_characters": ["Odette", "Odile", "Prince Siegfried"],
+      "acts": 4
+    },
+    "giselle": {
+      "title": "Giselle",
+      "composer": "Adolphe Adam", 
+      "synopsis": "A peasant girl dies of heartbreak and becomes a Wili, but her love transcends death.",
+      "image": "images/giselle.jpg",
+      "main_characters": ["Giselle", "Albrecht", "Myrtha"],
+      "acts": 2
+    },
+    "don_quixote": {
+      "title": "Don Quixote",
+      "composer": "Ludwig Minkus",
+      "synopsis": "The adventures of Don Quixote, focusing on the love story of Kitri and Basilio.",
+      "image": "images/don-quixote.jpg",
+      "main_characters": ["Kitri", "Basilio", "Don Quixote"],
+      "acts": 3
+    },
+    "la_bayadere": {
+      "title": "La Bayadère",
+      "composer": "Ludwig Minkus",
+      "synopsis": "A temple dancer's tragic love story set in ancient India.",
+      "image": "images/la-bayadere.jpg",
+      "main_characters": ["Nikiya", "Solor", "Gamzatti"],
+      "acts": 3
+    },
+    "nutcracker": {
+      "title": "The Nutcracker",
+      "composer": "Tchaikovsky",
+      "synopsis": "A young girl's magical Christmas Eve journey with her nutcracker prince.",
+      "image": "images/nutcracker.jpg",
+      "main_characters": ["Clara", "Nutcracker Prince", "Sugar Plum Fairy"],
+      "acts": 2
+    },
+    "sleeping_beauty": {
+      "title": "The Sleeping Beauty",
+      "composer": "Tchaikovsky",
+      "synopsis": "Princess Aurora pricks her finger and falls into a deep sleep, awaiting true love's kiss.",
+      "image": "images/sleeping-beauty.jpg",
+      "main_characters": ["Aurora", "Prince Désiré", "Lilac Fairy", "Carabosse"],
+      "acts": 3
+    },
+    "romeo_juliet": {
+      "title": "Romeo and Juliet",
+      "composer": "Sergei Prokofiev",
+      "synopsis": "Shakespeare's tragic love story of two young lovers from feuding families.",
+      "image": "images/romeo-juliet.jpg",
+      "main_characters": ["Juliet", "Romeo", "Mercutio"],
+      "acts": 3
+    },
+    "coppelia": {
+      "title": "Coppélia",
+      "composer": "Léo Delibes",
+      "synopsis": "A tale of a mechanical doll so lifelike that a young man falls in love with her.",
+      "image": "images/coppelia.jpg",
+      "main_characters": ["Swanhilda", "Franz", "Dr. Coppélius"],
+      "acts": 3
+    },
+    "la_sylphide": {
+      "title": "La Sylphide",
+      "composer": "Jean-Madeleine Schneitzhoeffer",
+      "synopsis": "A Scottish farmer is enchanted by a sylph, leading to tragedy when he abandons his bride.",
+      "image": "images/la-sylphide.jpg",
+      "main_characters": ["La Sylphide", "James", "Effie"],
+      "acts": 2
+    },
+    "paquita": {
+      "title": "Paquita",
+      "composer": "Édouard Deldevez",
+      "synopsis": "A Spanish gypsy girl discovers her noble heritage and finds love with a French officer.",
+      "image": "images/paquita.jpg",
+      "main_characters": ["Paquita", "Lucien", "Inigo"],
+      "acts": 3
+    },
+    "la_fille_mal_gardee": {
+      "title": "La Fille mal gardée",
+      "composer": "Ferdinand Hérold",
+      "synopsis": "A young farm girl outwits her mother to marry her true love instead of a wealthy suitor.",
+      "image": "images/la-fille-mal-gardee.jpg",
+      "main_characters": ["Lise", "Colas", "Widow Simone"],
+      "acts": 2
+    },
+    "raymonda": {
+      "title": "Raymonda",
+      "composer": "Alexander Glazunov",
+      "synopsis": "A medieval tale of a noblewoman who must choose between her betrothed and a Saracen knight.",
+      "image": "images/raymonda.jpg",
+      "main_characters": ["Raymonda", "Jean de Brienne", "Abderakhman"],
+      "acts": 3
+    }
+}

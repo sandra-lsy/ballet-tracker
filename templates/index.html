@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Ballet Tracker - Discover Classical Ballet{% endblock %}
+
+{% block extra_css %}
+.ballet-card {
+    transition: transform 0.2s;
+    height: 100%;
+    background-color: var(--timberwolf);
+    border: 1px solid var(--dim-grey);
+}
+
+.ballet-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(102, 66, 66, 0.15);
+}
+
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+    background: linear-gradient(135deg, var(--rosy-brown) 0%, var(--rose-ebony) 100%);
+}
+
+/* Fallback styling for when image fails to load */
+.card-img-placeholder {
+    height: 200px;
+    background: linear-gradient(135deg, var(--rosy-brown) 0%, var(--rose-ebony) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.display-4 {
+    color: var(--rose-ebony);
+}
+
+.lead {
+    color: var(--dim-grey);
+}
+
+.alert-info {
+    background-color: var(--pale-dogwood);
+    border-color: var(--dim-grey);
+    color: var(--rose-ebony);
+}
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-4 text-center mb-3">Discover Ballet</h1>
+        <p class="lead text-center text-muted">Explore classical ballet repertoire</p>
+    </div>
+</div>
+
+<!-- Ballet Grid -->
+<div class="row">
+    {% for ballet_id, ballet in ballets.items() %}
+    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+        <div class="card ballet-card h-100">
+            {% if ballet.image %}
+                <img src="{{ url_for('static', filename=ballet.image.replace('static/', '')) }}" 
+                     class="card-img-top" 
+                     alt="{{ ballet.title }}"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="card-img-placeholder" style="display: none;">
+                    {{ ballet.title }}
+                </div>
+            {% else %}
+                <div class="card-img-placeholder">
+                    {{ ballet.title }}
+                </div>
+            {% endif %}
+            
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">{{ ballet.title }}</h5>
+                <p class="text-muted mb-2">
+                    <small>Composer: {{ ballet.composer }}</small>
+                </p>
+                <p class="card-text flex-grow-1">{{ ballet.synopsis }}</p>
+                
+                <div class="mt-auto">
+                    <a href="{{ url_for('ballet_details', ballet_id=ballet_id) }}" 
+                       class="btn btn-primary w-100">
+                        Watch Videos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if not ballets %}
+<div class="row">
+    <div class="col-12 text-center">
+        <div class="alert alert-info">
+            <h4>No ballets found</h4>
+            <p>Check your data/ballets.json file to add ballet information.</p>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,517 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ballet.title }} - Ballet Tracker{% endblock %}
+
+{% block extra_css %}
+.video-card {
+    transition: transform 0.2s;
+    max-width: 350px;
+    background-color: var(--pale-dogwood);
+    border: 1px solid var(--dim-grey);
+}
+.video-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 66, 66, 0.15);
+}
+.video-thumbnail {
+    height: 180px;
+    object-fit: cover;
+    position: relative;
+}
+.bookmark-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(102, 66, 66, 0.9);
+    border: none;
+    border-radius: 8px;
+    width: 48px;
+    height: 48px;
+    color: #ffd700;
+    font-size: 24px;
+    z-index: 10;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.bookmark-btn:hover {
+    background: var(--rose-ebony);
+    color: #ffed4e;
+    transform: scale(1.1);
+}
+
+.video-thumbnail-container {
+    position: relative;
+}
+.suggestion-badge:hover {
+    background-color: var(--rosy-brown);
+    transform: scale(1.05);
+    transition: all 0.2s;
+}
+
+.collapse {
+    transition: all 0.3s ease;
+}
+
+#searchOptions .card-body {
+    background-color: var(--timberwolf);
+}
+
+.form-select {
+    background-color: var(--pale-dogwood);
+    border-color: var(--dim-grey);
+    color: var(--rose-ebony);
+}
+
+.form-select:focus {
+    border-color: var(--rosy-brown);
+    box-shadow: 0 0 0 0.2rem rgba(174, 131, 129, 0.25);
+}
+
+.btn:focus {
+    box-shadow: 0 0 0 0.2rem rgba(174, 131, 129, 0.25);
+}
+
+.card-header {
+    background-color: var(--pale-dogwood);
+    border-bottom: 1px solid var(--dim-grey);
+}
+
+.btn-link {
+    color: var(--rose-ebony);
+    text-decoration: none;
+}
+
+.btn-link:hover {
+    color: var(--dim-grey);
+}
+
+.modal-content {
+    background-color: var(--pale-dogwood);
+    color: var(--rose-ebony);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--dim-grey);
+}
+
+.btn-close {
+    filter: invert(1);
+}
+
+{% endblock %}
+
+{% block content %}
+<!-- Ballet Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item active">{{ ballet.title }}</li>
+            </ol>
+        </nav>
+        
+        <div class="bg-light p-4 rounded">
+            <h1 class="display-5 mb-3">{{ ballet.title }}</h1>
+            <p class="lead mb-2"><strong>Composer:</strong> {{ ballet.composer }}</p>
+            <p class="text-muted">{{ ballet.synopsis }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- Search Suggestions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#searchOptions">
+                        🔍 Advanced Search Options
+                    </button>
+                </h5>
+            </div>
+            <div id="searchOptions" class="collapse">
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Character -->
+                        <div class="col-md-3 mb-3">
+                            <label for="characterSelect" class="form-label">Character</label>
+                            <select class="form-select" id="characterSelect">
+                                <option value="">Select a character</option>
+                                {% for character in ballet.main_characters %}
+                                <option value="{{ character }}">{{ character }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <!-- Act -->
+                        <div class="col-md-3 mb-3">
+                            <label for="actSelect" class="form-label">Act</label>
+                            <select class="form-select" id="actSelect">
+                                <option value="">Select an act</option>
+                                {% for i in range(1, ballet.acts + 1) %}
+                                <option value="{{ i }}">Act {{ i }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <!-- Scene Type -->
+                        <div class="col-md-3 mb-3">
+                            <label for="sceneTypeSelect" class="form-label">Type</label>
+                            <select class="form-select" id="sceneTypeSelect">
+                                <option value="">Select a type</option>
+                                <option value="variation">Solo/Variation</option>
+                                <option value="pas_de_deux">Pas de Deux</option>
+                                <option value="pas_de_trois">Pas de Trois</option>
+                                <option value="corps_de_ballet">Corps de Ballet</option>
+                                <option value="grand_pas">Grand Pas</option>
+                            </select>
+                        </div>
+
+                        <!-- Search Button -->
+                        <div class="col-md-3 mb-3 d-flex align-items-end">
+                            <button class="btn btn-primary w-100" onclick="performCustomSearch()">
+                                Search Videos
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Suggestions -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <h6>Quick Suggestions:</h6>
+                            <div id="searchSuggestions" class="d-flex flex-wrap gap-2">
+                                <!-- Suggestions will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Videos Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="mb-3">
+            <span id="videosTitle">Performances & Videos</span>
+            <span id="loadingSpinner" class="spinner-border spinner-border-sm ms-2" style="display: none;"></span>
+        </h2>
+    </div>
+</div>
+
+<!-- Videos Container -->
+<div id="videosContainer">
+    <!-- Videos will be loaded here -->
+    {% if videos %}
+    <div class="row">
+        {% for video in videos %}
+        <div class="col-lg-4 col-md-6 col-xl-3 mb-4">
+            <div class="card video-card h-100">
+                <!-- Video thumbnail with overlay button -->
+                <div class="video-thumbnail-container">
+                    <img src="{{ video.thumbnail }}" class="card-img-top video-thumbnail" alt="{{ video.title }}" onclick="watchVideo('{{ video.embed_url }}')">
+                    
+                    <!-- Bookmark button - positioned absolutely inside image -->
+                    <button class="bookmark-btn" onclick="event.stopPropagation(); bookmarkVideo('{{ video.id }}', '{{ video.title|replace("'", "\\'") }}', '{{ video.embed_url }}')">
+                        ⭐
+                    </button>
+                </div>
+                
+                <div class="card-body d-flex flex-column">
+                    <h6 class="card-title">{{ video.title }}</h6>
+                    <p class="text-muted mb-2">
+                        <small>{{ video.channel }}</small>
+                    </p>
+                    <p class="card-text flex-grow-1 small">
+                        {{ video.description[:120] }}{% if video.description|length > 120 %}...{% endif %}
+                    </p>
+                    
+                    <!-- Action buttons -->
+                    <div class="mt-auto">
+                        <button class="btn btn-primary btn-sm w-100" onclick="watchVideo('{{ video.embed_url }}')">   
+                            Watch Video
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                <h4>No videos found</h4>
+                <p>We couldn't find any videos for {{ ballet.title }} at the moment. Please try again later.</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Video Modal -->
+<div class="modal fade" id="videoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Watch Video</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="ratio ratio-16x9">
+                    <iframe id="videoFrame" src="" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bookmark Modal -->
+<div class="modal fade" id="bookmarkModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Bookmark</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="bookmarkForm">
+                    <div class="mb-3">
+                        <label for="bookmarkNote" class="form-label">Add a note (optional):</label>
+                        <textarea class="form-control" id="bookmarkNote" rows="3" placeholder="Why did you bookmark this video?"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveBookmark()">Save Bookmark</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+let currentVideo = null;
+
+function watchVideo(embedUrl) {
+    console.log('Watch video clicked:', embedUrl);
+    const videoFrame = document.getElementById('videoFrame');
+    const videoModal = document.getElementById('videoModal');
+    
+    if (videoFrame && videoModal) {
+        videoFrame.src = embedUrl;
+        new bootstrap.Modal(videoModal).show();
+    } else {
+        console.error('Video modal elements not found');
+    }
+}
+
+function bookmarkVideo(videoId, title, embedUrl) {
+    console.log('Bookmark clicked:', videoId, title);
+    currentVideo = {
+        id: videoId,
+        title: title,
+        embed_url: embedUrl
+    };
+    
+    const bookmarkModal = document.getElementById('bookmarkModal');
+    if (bookmarkModal) {
+        new bootstrap.Modal(bookmarkModal).show();
+    } else {
+        console.error('Bookmark modal not found');
+    }
+}
+
+function saveBookmark() {
+    const noteElement = document.getElementById('bookmarkNote');
+    const note = noteElement ? noteElement.value : '';
+    
+    if (!currentVideo) {
+        alert('No video selected for bookmarking');
+        return;
+    }
+    
+    fetch('/add_bookmark', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            video: currentVideo,
+            note: note
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('Video bookmarked successfully!');
+            const bookmarkModal = document.getElementById('bookmarkModal');
+            if (bookmarkModal) {
+                bootstrap.Modal.getInstance(bookmarkModal).hide();
+            }
+            if (noteElement) {
+                noteElement.value = '';
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error saving bookmark');
+    });
+}
+
+function loadSearchSuggestions() {
+    fetch(`/ballet/search-suggestions/${balletId}`)
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('searchSuggestions');
+            container.innerHTML = '';
+            
+            data.suggestions.slice(0, 5).forEach(suggestion => {
+                const badge = document.createElement('span');
+                badge.className = 'badge bg-secondary me-2 mb-2 suggestion-badge';
+                badge.textContent = suggestion.replace(' ballet', '').replace(balletId.replace('_', ' '), '').trim();
+                badge.style.cursor = 'pointer';
+                badge.onclick = () => searchWithQuery(suggestion);
+                container.appendChild(badge);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading suggestions:', error);
+        });
+}
+
+// Clear video when modal closes
+document.addEventListener('DOMContentLoaded', function() {
+    const videoModal = document.getElementById('videoModal');
+    if (videoModal) {
+        videoModal.addEventListener('hidden.bs.modal', function () {
+            const videoFrame = document.getElementById('videoFrame');
+            if (videoFrame) {
+                videoFrame.src = '';
+            }
+        });
+    }
+    
+    loadSearchSuggestions();  // NEW: Load suggestions when page loads
+});
+
+let balletId = "{{ ballet_id }}";
+
+function performCustomSearch() {
+    const character = document.getElementById('characterSelect').value;
+    const act = document.getElementById('actSelect').value;
+    const sceneType = document.getElementById('sceneTypeSelect').value;
+    
+    // Build query parameters
+    const params = new URLSearchParams();
+    if (character) params.append('character', character);
+    if (act) params.append('act', act);
+    if (sceneType) params.append('scene_type', sceneType);
+    
+    // Show loading
+    showLoading('Searching for custom videos...');
+    
+    // Make API call
+    fetch(`/ballet/custom-search/${balletId}?${params.toString()}`)
+        .then(response => response.json())
+        .then(data => {
+            updateVideosDisplay(data.videos, `Custom Search: ${data.query}`);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            hideLoading();
+            alert('Error performing search');
+        });
+}
+
+function searchWithQuery(query) {
+    showLoading(`Searching: ${query}`);
+    
+    fetch(`/ballet/custom-search/${balletId}?query=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+            updateVideosDisplay(data.videos, `Search: ${query}`);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            hideLoading();
+            alert('Error performing search');
+        });
+}
+
+function showLoading(message) {
+    document.getElementById('videosTitle').textContent = message;
+    document.getElementById('loadingSpinner').style.display = 'inline-block';
+}
+
+function hideLoading() {
+    document.getElementById('videosTitle').textContent = 'Performances & Videos';
+    document.getElementById('loadingSpinner').style.display = 'none';
+}
+
+function updateVideosDisplay(videos, title) {
+    hideLoading();
+    document.getElementById('videosTitle').textContent = title;
+    
+    const container = document.getElementById('videosContainer');
+
+    if (videos && videos.length > 0) {
+        let html = '<div class="row">';
+        videos.forEach(video => {
+            html += `
+                <div class="col-lg-4 col-md-6 col-xl-3 mb-4">
+                    <div class="card video-card h-100">
+                        <!-- Video thumbnail with overlay button -->
+                        <div class="video-thumbnail-container">
+                            <img src="${video.thumbnail}" class="card-img-top video-thumbnail" alt="${video.title}" onclick="watchVideo('${video.embed_url}')">
+                            
+                            <!-- Bookmark button - positioned absolutely inside image -->
+                            <button class="bookmark-btn" onclick="event.stopPropagation(); bookmarkVideo('${video.id}', '${video.title.replace(/'/g, "\\'")}', '${video.embed_url}')">
+                                ⭐
+                            </button>
+                        </div>
+                        
+                        <div class="card-body d-flex flex-column">
+                            <h6 class="card-title">${video.title}</h6>
+                            <p class="text-muted mb-2">
+                                <small>${video.channel}</small>
+                            </p>
+                            <p class="card-text flex-grow-1 small">
+                                ${video.description.substring(0, 120)}${video.description.length > 120 ? '...' : ''}
+                            </p>
+                            
+                            <!-- Action buttons -->
+                            <div class="mt-auto">
+                                <button class="btn btn-primary btn-sm w-100" onclick="watchVideo('${video.embed_url}')">   
+                                    Watch Video
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+    } else {
+        container.innerHTML = `
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-info text-center">
+                        <h4>No videos found</h4>
+                        <p>No videos found for this search. Try different parameters.</p>
+                        <button class="btn btn-secondary" onclick="location.reload()">
+                            Show Default Videos
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block title %}My Bookmarks - Ballet Tracker{% endblock %}
+
+{% block extra_css %}
+.bookmark-card {
+    transition: transform 0.2s;
+    background-color: var(--pale-dogwood);
+    border: 1px solid var(--dim-grey);
+}
+
+.bookmark-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 66, 66, 0.15);
+}
+
+.video-thumbnail {
+    height: 180px;
+    object-fit: cover;
+    background: linear-gradient(135deg, var(--rosy-brown) 0%, var(--rose-ebony) 100%);
+}
+
+.bookmark-note {
+    background-color: var(--timberwolf);
+    border-left: 4px solid var(--rosy-brown);
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 0 4px 4px 0;
+    color: var(--rose-ebony);
+}
+
+.btn-outline-danger {
+    color: var(--rose-ebony);
+    border-color: var(--dim-grey);
+}
+
+.btn-outline-danger:hover {
+    background-color: var(--rose-ebony);
+    border-color: var(--rose-ebony);
+    color: white;
+}
+
+.alert-info {
+    background-color: var(--pale-dogwood);
+    border-color: var(--pale-dogwood);
+    color: var(--rose-ebony);
+}
+
+.text-muted {
+    color: var(--dim-grey) !important;
+}
+
+.modal-content {
+    background-color: var(--pale-dogwood);
+    color: var(--rose-ebony);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--dim-grey);
+}
+
+.btn-close {
+    filter: invert(1);
+}
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item active">My Bookmarks</li>
+            </ol>
+        </nav>
+        
+        <h1 class="display-5 mb-3">My Bookmarks</h1>
+        <p class="lead text-muted">Your saved ballet performances and videos</p>
+    </div>
+</div>
+
+{% if bookmarks %}
+<!-- Bookmarks Grid -->
+<div class="row">
+    {% for bookmark in bookmarks %}
+    <div class="col-lg-4 col-md-6 col-xl-3 mb-4">
+        <div class="card bookmark-card h-100">
+            <!-- Video thumbnail -->
+            <img class="card-img-top video-thumbnail" 
+                 src="https://img.youtube.com/vi/{{ bookmark.video_id }}/maxresdefault.jpg"
+                 alt="{{ bookmark.title }} thumbnail"
+                 onerror="this.src='https://img.youtube.com/vi/{{ bookmark.video_id }}/hqdefault.jpg'"
+                 style="height: 180px; object-fit: cover;">
+            
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">{{ bookmark.title }}</h5>
+                
+                <!-- User note if exists -->
+                {% if bookmark.note %}
+                <div class="bookmark-note">
+                    <small class="text-muted d-block mb-1">Your note:</small>
+                    <p class="mb-0">{{ bookmark.note }}</p>
+                </div>
+                {% endif %}
+                
+                <!-- Action buttons -->
+                <div class="mt-auto pt-3">
+                    <button class="btn btn-primary w-100 mb-2" onclick="watchVideo('{{ bookmark.embed_url }}')">
+                        <i class="fas fa-play me-2"></i>Watch Video
+                    </button>
+                    <button class="btn btn-outline-danger w-100" onclick="removeBookmark('{{ loop.index0 }}')">
+                        <i class="fas fa-trash me-2"></i>Remove Bookmark
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Stats -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            You have <strong>{{ bookmarks|length }}</strong> bookmarked video{{ 's' if bookmarks|length != 1 else '' }}.
+        </div>
+    </div>
+</div>
+
+{% else %}
+<!-- Empty state -->
+<div class="row">
+    <div class="col-12 text-center">
+        <div class="py-5">
+            <i class="fas fa-bookmark fa-4x text-muted mb-3"></i>
+            <h3 class="text-muted">No bookmarks yet</h3>
+            <p class="text-muted mb-4">Start exploring ballets and bookmark your favorite performances!</p>
+            <a href="{{ url_for('index') }}" class="btn btn-primary">
+                <i class="fas fa-search me-2"></i>Discover Ballets
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Video Modal (same as ballet_details) -->
+<div class="modal fade" id="videoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Watch Video</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="ratio ratio-16x9">
+                    <iframe id="videoFrame" src="" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+function watchVideo(embedUrl) {
+    document.getElementById('videoFrame').src = embedUrl;
+    new bootstrap.Modal(document.getElementById('videoModal')).show();
+}
+
+function removeBookmark(index) {
+    if (confirm('Are you sure you want to remove this bookmark?')) {
+        // Implement remove bookmark functionality
+        fetch(`/remove_bookmark/${index}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('Bookmark removes successfully!');
+                location.reload(); //Refresh the page
+            } else {
+                alert('Error removing bookmark: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error removing bookmark');
+        });
+    }
+}
+
+// Clear video when modal closes
+document.addEventListener('DOMContentLoaded', function() {
+    const videoModal = document.getElementById('videoModal');
+    if (videoModal) {
+        videoModal.addEventListener('hidden.bs.modal', function () {
+            const videoFrame = document.getElementById('videoFrame');
+            if (videoFrame) {
+                videoFrame.src = '';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
