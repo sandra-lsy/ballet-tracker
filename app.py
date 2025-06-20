@@ -4,9 +4,6 @@ import os
 from youtube_api import YouTubeAPI
 from ballet_search import BalletSearchEngine
 
-#TODO:
-# - Add a way to add a new ballet
-# - 
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
@@ -46,7 +43,7 @@ def save_bookmark(video_data, note):
     bookmarks.append(bookmark)
 
     with open("data/bookmarks.json", "w") as f:
-        json.dump(bookmarks, f, indent=2) # What does json dump do?
+        json.dump(bookmarks, f, indent=2)
 
 @app.route("/")
 def index():
@@ -118,11 +115,11 @@ def custom_search(ballet_id):
 @app.route("/add_bookmark", methods=["POST"])
 def add_bookmark():
     """Add a video bookmark with user note"""
-    video_data = request.json.get('video') # What does request do and what is 'video'?
+    video_data = request.json.get('video')
     note = request.json.get('note', '')
 
     save_bookmark(video_data, note)
-    return jsonify({"status": 'success'}) # What does jsonify do?
+    return jsonify({"status": 'success'})
 
 @app.route("/bookmarks")
 def bookmarks():
@@ -143,21 +140,6 @@ def remove_bookmark(bookmark_index):
         return jsonify({"status": "error", "message": "Bookmark not found"}), 404
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
-
-# @app.route("/update_bookmark_note/<int:bookmark_index>", methods=["POST"])
-# def update_bookmark_note(bookmark_index):
-#     """Update a bookmark note"""
-#     try:
-#         user_bookmarks = load_bookmarks()
-#         if 0 <= bookmark_index < len(user_bookmarks):
-#             new_note = request.json.get('note', '')
-#             user_bookmarks[bookmark_index]['note'] = new_note
-#             with open("data/bookmarks.json", "w") as f:
-#                 json.dump(user_bookmarks, f, indent=2)
-#             return jsonify({"status": "success"})
-#         return jsonify({"status": "error", "message": "Bookmark not found"}), 404
-#     except Exception as e:
-#         return jsonify({"status": "error", "message": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
